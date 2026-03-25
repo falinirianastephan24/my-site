@@ -1,0 +1,5 @@
+body { background-color: #f4f4f4; font-family: Arial; text-align: center; }
+.container { background: white; width: 50%; margin: 50px auto; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+h1 { color: #007bff; }
+img { width: 200px; border-radius: 50%; }
+.db-info { color: green; font-weight: bold; }
