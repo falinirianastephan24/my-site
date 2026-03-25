@@ -35,21 +35,22 @@ class WebServer(object):
 if __name__ == '__main__':
     init_db()
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # 1. Raiso ny Port omen'ny Render (default 10000 raha tsy misy)
+
+    # Raiso ny Port avy amin'ny Render
     port = int(os.environ.get("PORT", 10000))
-    
-    # 2. Ampidiro ny config ho an'ny Server (Host 0.0.0.0 no ilain'ny Render)
+
+    # TSY MAINTSY ATAO ALOHAN'NY QUICKSTART ITY CONFIG ITY
     cherrypy.config.update({
         'server.socket_host': '0.0.0.0',
         'server.socket_port': port,
     })
-    
+
     config = {
         '/css_sy_sary': {
             'tools.staticdir.on': True,
             'tools.staticdir.dir': os.path.join(current_dir, 'css_sy_sary')
         }
     }
-    
+
+    # Atomboy ny server
     cherrypy.quickstart(WebServer(), '/', config)
