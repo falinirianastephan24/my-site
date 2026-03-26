@@ -1,14 +1,34 @@
-<form action="/add" method="post" enctype="multipart/form-data">
-    <input type="text" name="anarana" placeholder="Anarana" required>
-    <input type="file" name="sary" accept="image/*" required>
-    <button type="submit">Ampidiro</button>
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mon App Python</title>
+</head>
+<body>
+    <h2>Ampidiro ny mombamomba anao</h2>
+    
+    <!-- Ity no mampipoitra ilay fanaovana upload -->
+    <form action="/add" method="post" enctype="multipart/form-data">
+        <input type="text" name="anarana" placeholder="Anarana" required>
+        <br><br>
+        <input type="file" name="sary" accept="image/*" required>
+        <br><br>
+        <button type="submit">Hampiditra sary</button>
+    </form>
 
-<ul>
-    {% for r in olona %}
-        <li>
-            {{ r[0] }} <br>
-            <img src="{{ url_for('static', filename='uploads/' + r[1]) }}" width="100">
-        </li>
-    {% endfor %}
-</ul>
+    <hr>
+
+    <h2>Lisitry ny olona sy sary</h2>
+    <ul>
+        {% for r in olona %}
+            <li>
+                <b>Anarana:</b> {{ r[0] }} <br>
+                {% if r[1] %}
+                    <img src="{{ url_for('static', filename='uploads/' + r[1]) }}" width="150" alt="Sary">
+                {% endif %}
+            </li>
+        {% else %}
+            <li>Mbola tsy misy data.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
