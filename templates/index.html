@@ -1,5 +1,14 @@
+<form action="/add" method="post" enctype="multipart/form-data">
+    <input type="text" name="anarana" placeholder="Anarana" required>
+    <input type="file" name="sary" accept="image/*" required>
+    <button type="submit">Ampidiro</button>
+</form>
+
 <ul>
     {% for r in olona %}
-        <li>{{ r[0] }}</li>
+        <li>
+            {{ r[0] }} <br>
+            <img src="{{ url_for('static', filename='uploads/' + r[1]) }}" width="100">
+        </li>
     {% endfor %}
 </ul>
