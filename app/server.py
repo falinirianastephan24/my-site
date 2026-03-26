@@ -1,76 +1,24 @@
-import http.server
-import socketserver
-import sqlite3
-import os
+from flask import Flask, render_template
+import sqlite3, os
 
-# 1. Fikirana ny Port ho an'ny Render
-PORT = int(os.environ.get("PORT", 8000))
-
-# 2. Lalana (Paths) mankany amin'ny dossiers hafa
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TEMPLATE_DIR = os.path.join(BASE_DIR, 'templates')
-STATIC_DIR = os.path.join(BASE_DIR, 'static')
+app = Flask(__name__, template_folder='../templates', static_folder='../static')
 DB_PATH = os.path.join(os.path.dirname(__file__), 'database.db')
 
-class MyHandler(http.server.SimpleHTTPRequestHandler):
-    
-    def do_GET(self):
-        # A. Raha mangataka CSS (ao amin'ny /static/)
-        if self.path.startswith('/static/'):
-            try:
-                file_name = self.path.split('/')[-1]
-                file_path = os.path.join(STATIC_DIR, file_name)
-                
-                self.send_response(200)
-                self.send_header('Content-type', 'text/css')
-                self.end_headers()
-                
-                with open(file_path, 'rb') as f:
-                    self.wfile.write(f.read())
-            except Exception:
-                self.send_error(404, "Tsy hita ny CSS")
-            return
+def init_db():
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.execute("CREATE TABLE IF NOT EXISTS olona (anarana TEXT)")
+        # Ampio ohatra raha mbola banga
+        res = conn.execute("SELECT COUNT(*) FROM olona").fetchone()
+        if res[0] == 0:
+            conn.execute("INSERT INTO olona (anarana) VALUES ('Rakoto'), ('Rabe')")
 
-        # B. Pejy fandraisana (HTML + SQLite)
-        if self.path == '/' or self.path == '/index.html':
-            self.send_response(200)
-            self.send_header('Content-type', 'text/html; charset=utf-8')
-            self.end_headers()
+@app.route('/')
+def index():
+    init_db()
+    with sqlite3.connect(DB_PATH) as conn:
+        olona = conn.execute("SELECT anarana FROM olona").fetchall()
+    return render_template('index.html', olona=olona)
 
-            # --- DATABASE: Maka data ---
-            conn = sqlite3.connect(DB_PATH)
-            cursor = conn.cursor()
-            cursor.execute("CREATE TABLE IF NOT EXISTS olona (anarana TEXT)")
-            # Manampy ohatra raha mbola banga
-            cursor.execute("SELECT COUNT(*) FROM olona")
-            if cursor.fetchone()[0] == 0:
-                cursor.execute("INSERT INTO olona VALUES ('Rakoto'), ('Rabe')")
-                conn.commit()
-            
-            cursor.execute("SELECT anarana FROM olona")
-            rows = cursor.fetchall()
-            conn.close()
-
-            # --- HTML: Mamaky sy mameno data ---
-            html_file = os.path.join(TEMPLATE_DIR, 'index.html')
-            try:
-                with open(html_file, 'r', encoding='utf-8') as f:
-                    content = f.read()
-                
-                # Manolo ny {{data}} ho lisitra HTML
-                data_list = "".join([f"<li>{r[0]}</li>" for r in rows])
-                final_html = content.replace("{{data}}", data_list)
-                
-                self.wfile.write(bytes(final_html, "utf-8"))
-            except FileNotFoundError:
-                self.wfile.write(b"Tsy hita ny index.html ao amin'ny folder templates/")
-        
-        else:
-            # Raha misy file hafa tadiavina
-            super().do_GET()
-
-# 3. Mandefa ny Server
-with socketserver.TCPServer(("", PORT), MyHandler) as httpd:
-    print(f"Server mandeha ao amin'ny: http://localhost:{PORT}")
-    print(f"Raha ao amin'ny Render ianao dia ampiasao ny Start Command: python app/server.py")
-    httpd.serve_forever()
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
